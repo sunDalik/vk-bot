@@ -2,7 +2,6 @@ import vk_api
 from vk_api.bot_longpoll import VkBotLongPoll, VkBotEventType
 import random
 from config import token, group_id
-from sys import stdin
 
 vk_session = vk_api.VkApi(token=token)
 vk = vk_session.get_api()
@@ -47,7 +46,6 @@ def main():
                 mentions.append(input())
             except EOFError:
                 break
-        print("Loading...")
 
     elif option == "2":
         print("Enter config file:")
