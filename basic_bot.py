@@ -33,8 +33,8 @@ def get_mode():
             try:
                 for event in longpoll.listen():
                     if event.type == VkBotEventType.MESSAGE_NEW:
-                        e = event.object
-                        print (e)
+                        print(event)
+                        # e = event.object
                         # print('New message: ' + e.text)
             except requests.exceptions.ReadTimeout as timeout:
                 continue
