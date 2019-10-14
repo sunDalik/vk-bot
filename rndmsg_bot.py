@@ -4,6 +4,7 @@ import random
 import re
 import sys
 from config import token, group_id
+import requests
 
 
 vk_session = vk_api.VkApi(token=token)
