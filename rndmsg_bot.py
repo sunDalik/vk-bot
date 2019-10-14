@@ -7,7 +7,8 @@ vk_session = vk_api.VkApi(token=token)
 vk = vk_session.get_api()
 
 def send_message(peer, msg, random):
-    vk.messages.send(peer_id=peer, message=msg, random_id=random)
+    if msg.strip() != "":
+        vk.messages.send(peer_id=peer, message=msg, random_id=random)
 
 
 def rndmsg_mode(msg_list, mentions):
@@ -24,7 +25,6 @@ def rndmsg_mode(msg_list, mentions):
                             send_message(e.peer_id, random.choice(msg_list), random.randint(1, 1000000000))
                         except Exception as e:
                             print(e)
-                            pass
         except requests.exceptions.ReadTimeout as timeout:
             continue
 

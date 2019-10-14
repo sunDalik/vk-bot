@@ -6,9 +6,9 @@ from config import token, group_id
 vk_session = vk_api.VkApi(token=token)
 vk = vk_session.get_api()
 
-
 def send_message(peer, msg, random):
-    vk.messages.send(peer_id=peer, message=msg, random_id=random)
+    if msg.strip() != "":
+        vk.messages.send(peer_id=peer, message=msg, random_id=random)
 
 
 def msg_mode():
@@ -22,24 +22,21 @@ def msg_mode():
             elif msg == "/exit":
                 return
             else:
-                send_message(peer, msg, random.randint(1, 1000000000) )
+                send_message(peer, msg, random.randint(1, 1000000000))
 
 
 def get_mode():
-    print("You will now receive message events!\nUse Ctrl-C to exit mode.(ummm doesnt work actually)")
-    try:
-        while True:
-            longpoll = VkBotLongPoll(vk_session, group_id)
-            try:
-                for event in longpoll.listen():
-                    if event.type == VkBotEventType.MESSAGE_NEW:
-                        print(event)
-                        # e = event.object
-                        # print('New message: ' + e.text)
-            except requests.exceptions.ReadTimeout as timeout:
-                continue
-    except KeyboardInterrupt:
-        return
+    print("You will now receive message events!")
+    while True:
+        longpoll = VkBotLongPoll(vk_session, group_id)
+        try:
+            for event in longpoll.listen():
+                if event.type == VkBotEventType.MESSAGE_NEW:
+                    print(event)
+                    # e = event.object
+                    # print('New message: ' + e.text)
+        except requests.exceptions.ReadTimeout as timeout:
+            continue
 
 
 def main():
@@ -57,5 +54,6 @@ def main():
             return 0
         else:
             print("Invalid mode")
+
 
 main()
