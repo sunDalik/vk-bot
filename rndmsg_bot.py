@@ -29,7 +29,7 @@ def rndmsg_mode(msg_list, mentions):
                     # if any(mention in e.text.lower() for mention in mentions):
 
                     ## If you want mention to be a separate word then use this:
-                    if mentions_re.search(e.text.lower()):
+                    if mentions_re.search(e.text.lower()) or (e.reply_message and e.reply_message.get("from_id") == -group_id):
                         try:
                             send_message(e.peer_id, random.choice(msg_list), random.randint(1, 1000000000))
                         except Exception as e:
