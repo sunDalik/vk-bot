@@ -18,18 +18,29 @@ def send_message(peer, msg, random):
 def rndmsg_mode(msg_list, mentions):
     if not mentions:
         mentions = ['rndmsg']
+    joker = ['джокер', 'joker', 'джокера', 'джокеру', 'джокером', 'джокере']
     mentions_re = re.compile(r"\b(" + "|".join(mentions) + r")\b")
+    joker_re = re.compile(r"\b(" + "|".join(joker) + r")\b")
     while True:
         longpoll = VkBotLongPoll(vk_session, group_id)
         try:
             for event in longpoll.listen():
                 if event.type == VkBotEventType.MESSAGE_NEW:
                     e = event.object
-                    ## If you want to find a mention absolutely anywhere then use this:
-                    # if any(mention in e.text.lower() for mention in mentions):
-
-                    ## If you want mention to be a separate word then use this:
-                    if mentions_re.search(e.text.lower()) or (e.reply_message and e.reply_message.get("from_id") == -group_id):
+                    attachments = list(filter(lambda a: a.type =="photo", e.attachments))
+                    if joker_re.search(e.text.lower()):
+                        print("joker")
+                    elif (mentions_re.search(e.text.lower()) or (e.reply_message and e.reply_message.get("from_id") == -group_id)) and len(attachments) != 0:
+                        print("photo + text")
+                    elif mentions_re.search(e.text.lower()) or (e.reply_message and e.reply_message.get("from_id") == -group_id):
+                        try:
+                            send_message(e.peer_id, random.choice(msg_list), random.randint(1, 1000000000))
+                        except Exception as e:
+                            print(e)
+                    elif len(attachments != 0) and random.randint(1,4) == 1:
+                        # attachment[0]
+                        print("b")
+                    elif random.randint(1, 10) == 1:
                         try:
                             send_message(e.peer_id, random.choice(msg_list), random.randint(1, 1000000000))
                         except Exception as e:
