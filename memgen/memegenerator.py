@@ -1,5 +1,8 @@
 # -*- coding: utf-8 -*-
-
+# based on https://github.com/danieldiekmeier/memegenerator
+# added multiline strings feature
+# usage: make_meme(["We live", "in", "a society"], ["Bottom text"], "joker.jpg")
+# will generate `temp.png`
 import PIL
 from PIL import ImageFont
 from PIL import Image
