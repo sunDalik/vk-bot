@@ -1,9 +1,5 @@
-# pip3 install --user numpy tensorflow keras pillow
 # Example usage:
 # get_msg(msg_list, 'temp')
-
-import os
-os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
 import numpy as np
 from keras.applications.xception import Xception, preprocess_input, decode_predictions
@@ -32,10 +28,12 @@ def get_msg(msg_list, img_path):
     preds = model.predict(x)
     keywords = [pred[1] for pred in decode_predictions(preds, top=3)[0]]
     for k in keywords:
+        if k not in image_mapping:
+            continue
         msg_indexes = image_mapping[k]
         if len(msg_indexes) > 0:
-            print('Predicted image as ' + ', '.join(keywords) + '. Picked ' + k)
+            print('Predicted image as {' + ', '.join(keywords) + '}. Picked ' + k)
             i = random.choice(msg_indexes)
             if i < len(msg_list):
                 return msg_list[i]
-    
+
