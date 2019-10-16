@@ -2,6 +2,9 @@
 # Example usage:
 # get_msg(msg_list, 'temp')
 
+import os
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2' # INFO and WARNING messages are not printed
+
 import numpy as np
 from keras.applications.xception import Xception, preprocess_input, decode_predictions
 from keras.preprocessing import image
@@ -31,6 +34,7 @@ def get_msg(msg_list, img_path):
     for k in keywords:
         msg_indexes = image_mapping[k]
         if len(msg_indexes) > 0:
+            print('Predicted image as ' + ', '.join(keywords) + '. Picked ' + k)
             i = random.choice(msg_indexes)
             if i < len(msg_list):
                 return msg_list[i]
