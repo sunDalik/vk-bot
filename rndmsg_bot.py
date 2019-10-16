@@ -27,22 +27,25 @@ def rndmsg_mode(msg_list, mentions):
             for event in longpoll.listen():
                 if event.type == VkBotEventType.MESSAGE_NEW:
                     e = event.object
-                    attachments = list(filter(lambda a: a.type =="photo", e.attachments))
+                    attachments = list(filter(lambda a: a.get("type") =="photo", e.attachments))
+                    if len(attachments) != 0:
+                        img_resp = vk_session.http.get(attachments[0].get("photo").get("sizes")[-1].get("url"), allow_redirects=True)
+                        open('temp', 'wb').write(img_resp.content)
                     if joker_re.search(e.text.lower()):
                         print("joker")
                     elif (mentions_re.search(e.text.lower()) or (e.reply_message and e.reply_message.get("from_id") == -group_id)) and len(attachments) != 0:
                         print("photo + text")
                     elif mentions_re.search(e.text.lower()) or (e.reply_message and e.reply_message.get("from_id") == -group_id):
                         try:
-                            send_message(e.peer_id, random.choice(msg_list), random.randint(1, 1000000000))
+                            send_message(e.peer_id, random.choice(msg_list), random.randint(-2147483648, 2147483647))
                         except Exception as e:
                             print(e)
-                    elif len(attachments != 0) and random.randint(1,4) == 1:
+                    elif len(attachments) != 0 and random.randint(1,4) == 1:
                         # attachment[0]
                         print("b")
-                    elif random.randint(1, 10) == 1:
+                    elif random.randint(1, 100) == 1:
                         try:
-                            send_message(e.peer_id, random.choice(msg_list), random.randint(1, 1000000000))
+                            send_message(e.peer_id, random.choice(msg_list), random.randint(-2147483648, 2147483647))
                         except Exception as e:
                             print(e)
         except requests.exceptions.ReadTimeout as timeout:
