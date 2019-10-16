@@ -17,7 +17,7 @@ model = Xception(
     classes=1000
 )
 
-with open('image-mapping.json', 'r') as f:
+with open('img2msg/image-mapping.json', 'r') as f:
     image_mapping = json.load(f)
 
 def get_msg(msg_list, img_path):

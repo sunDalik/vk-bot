@@ -51,9 +51,7 @@ def rndmsg_mode(msg_list, mentions):
                     elif (mentions_re.search(e.text.lower()) or (e.reply_message and e.reply_message.get("from_id") == -group_id)) and len(attachments) != 0:
                         img_resp = vk_session.http.get(attachments[0].get("photo").get("sizes")[-1].get("url"), allow_redirects=True)
                         open('temp', 'wb').write(img_resp.content)
-                        print("tensorflow activated")
                         send_message(e.peer_id, img2msg.get_msg(msg_list, "temp"))
-                        print("tensorflow deactivated")
                     elif mentions_re.search(e.text.lower()) or (e.reply_message and e.reply_message.get("from_id") == -group_id):
                         try:
                             send_message(e.peer_id, random.choice(msg_list))
