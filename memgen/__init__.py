@@ -25,7 +25,7 @@ def make_meme(topStrings, bottomStrings, filename):
 	for bottomString in bottomStrings:
 		fontsizes.append(get_fontsize(imageSize, bottomString))
 	fontSize = min(fontsizes)
-	font = ImageFont.truetype("font.ttf", fontSize)
+	font = ImageFont.truetype("memgen/font.ttf", fontSize)
 
 	line_num = 0
 	for topString in topStrings:
@@ -58,11 +58,11 @@ def make_meme(topStrings, bottomStrings, filename):
 def get_fontsize(imageSize, text):
 	# find biggest font size that works
 	fontSize = int(imageSize[1]/10)
-	font = ImageFont.truetype("font.ttf", fontSize)
+	font = ImageFont.truetype("memgen/font.ttf", fontSize)
 	textSize = font.getsize(text)
 	while textSize[0] > imageSize[0]-20:
 		fontSize = fontSize - 1
-		font = ImageFont.truetype("font.ttf", fontSize)
+		font = ImageFont.truetype("memgen/font.ttf", fontSize)
 		textSize = font.getsize(text)
 	return fontSize
 

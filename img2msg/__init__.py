@@ -3,7 +3,7 @@
 # get_msg(msg_list, 'temp')
 
 import os
-os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2' # INFO and WARNING messages are not printed
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
 import numpy as np
 from keras.applications.xception import Xception, preprocess_input, decode_predictions

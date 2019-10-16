@@ -5,4 +5,4 @@ config.py
 *.config
 joker/
 test.pl
-temp
+temp*

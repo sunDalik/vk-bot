@@ -7,7 +7,8 @@ import os
 import json
 from config import token, group_id
 import requests
-import img2msg 
+import img2msg
+import memgen
 
 vk_session = vk_api.VkApi(token=token)
 vk = vk_session.get_api()
@@ -46,11 +47,12 @@ def rndmsg_mode(msg_list, mentions):
                     e = event.object
                     attachments = list(filter(lambda a: a.get("type") =="photo", e.attachments))
                     if joker_re.search(e.text.lower()):
-                        photo = upload_photo("joker/" + random.choice(os.listdir("joker")))
+                        memgen.make_meme([random.choice(msg_list)], [random.choice(msg_list)], "joker/" + random.choice(os.listdir("joker")))
+                        photo = upload_photo("temp.png")
                         send_message(e.peer_id, attachment=photo)
                     elif (mentions_re.search(e.text.lower()) or (e.reply_message and e.reply_message.get("from_id") == -group_id)) and len(attachments) != 0:
                         img_resp = vk_session.http.get(attachments[0].get("photo").get("sizes")[-1].get("url"), allow_redirects=True)
-                        open('temp', 'wb').write(img_resp.content)
+                        open('memgen/temp', 'wb').write(img_resp.content)
                         send_message(e.peer_id, img2msg.get_msg(msg_list, "temp"))
                     elif mentions_re.search(e.text.lower()) or (e.reply_message and e.reply_message.get("from_id") == -group_id):
                         try:
