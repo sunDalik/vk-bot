@@ -48,12 +48,12 @@ def rndmsg_mode(msg_list, mentions):
                     e = event.object
                     attachments = list(filter(lambda a: a.get("type") =="photo", e.attachments))
                     if joker_re.search(e.text.lower()):
-                        memgen.make_meme(random.choice(joker_images), "temp.png", msg_list)
-                        photo = upload_photo("temp.png")
+                        memgen.make_meme(random.choice(joker_images), "temp.jpg", msg_list)
+                        photo = upload_photo("temp.jpg")
                         send_message(e.peer_id, attachment=photo)
                     elif (mentions_re.search(e.text.lower()) or (e.reply_message and e.reply_message.get("from_id") == -group_id)) and len(attachments) != 0:
                         img_resp = vk_session.http.get(attachments[0].get("photo").get("sizes")[-1].get("url"), allow_redirects=True)
-                        open('memgen/temp', 'wb').write(img_resp.content)
+                        open('temp', 'wb').write(img_resp.content)
                         send_message(e.peer_id, img2msg.get_msg(msg_list, "temp"))
                     elif mentions_re.search(e.text.lower()) or (e.reply_message and e.reply_message.get("from_id") == -group_id):
                         try:
