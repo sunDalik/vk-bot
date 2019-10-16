@@ -47,22 +47,37 @@ def rndmsg_mode(msg_list, mentions):
                 if event.type == VkBotEventType.MESSAGE_NEW:
                     e = event.object
                     attachments = list(filter(lambda a: a.get("type") =="photo", e.attachments))
+                    # on joker command send joker meme
                     if joker_re.search(e.text.lower()):
                         memgen.make_meme(random.choice(joker_images), "temp.jpg", msg_list)
                         photo = upload_photo("temp.jpg")
-                        send_message(e.peer_id, attachment=photo)
+                        try:
+                            send_message(e.peer_id, attachment=photo)
+                        except Exception as e:
+                            print(e)
+                    # on mention + photo reply to photo
                     elif (mentions_re.search(e.text.lower()) or (e.reply_message and e.reply_message.get("from_id") == -group_id)) and len(attachments) != 0:
                         img_resp = vk_session.http.get(attachments[0].get("photo").get("sizes")[-1].get("url"), allow_redirects=True)
                         open('temp', 'wb').write(img_resp.content)
-                        send_message(e.peer_id, img2msg.get_msg(msg_list, "temp"))
+                        try:
+                            send_message(e.peer_id, img2msg.get_msg(msg_list, "temp"))
+                        except Exception as e:
+                            print(e)
+                    # on mention or reply send random message
                     elif mentions_re.search(e.text.lower()) or (e.reply_message and e.reply_message.get("from_id") == -group_id):
                         try:
                             send_message(e.peer_id, random.choice(msg_list))
                         except Exception as e:
                             print(e)
-                    elif len(attachments) != 0 and random.randint(1,4) == 1:
+                    # on photo with no mentions has a chance to reply to it
+                    elif len(attachments) != 0 and random.randint(1,10) == 1:
                         img_resp = vk_session.http.get(attachments[0].get("photo").get("sizes")[-1].get("url"), allow_redirects=True)
                         open('temp', 'wb').write(img_resp.content)
+                        try:
+                            send_message(e.peer_id, img2msg.get_msg(msg_list, "temp"))
+                        except Exception as e:
+                            print(e)
+                    # has a chance to reply to any message
                     elif random.randint(1, 100) == 1:
                         try:
                             send_message(e.peer_id, random.choice(msg_list))
@@ -70,6 +85,8 @@ def rndmsg_mode(msg_list, mentions):
                             print(e)
         except requests.exceptions.ReadTimeout as timeout:
             continue
+
+
 
 
 def main():

@@ -10,7 +10,7 @@ my $output_file = "whatever.html";
 
 my $messages_from_user = "";
 my $i = 0;
-while ($input_file =~ /<div.*?class="msg_item">.*?<div class="from">.*?<b>$username<\/b>.*?<div class="msg_body">(.*?)<\/div>/g){
+while ($input_file =~ /<div id="msg\d+?" class="msg_item">.*?<div class="from"> <b>$username<\/b>.*?<div class="msg_body">(.*?)<\/div>/g){
 	# print progress
 	$i++;
 	if ($i % 100 == 0) {
@@ -25,7 +25,6 @@ while ($input_file =~ /<div.*?class="msg_item">.*?<div class="from">.*?<b>$usern
 	$msg =~ s/&gt;/>/g;
 	$msg =~ s/&lt;/</g;
 	$msg =~ s/&amp;/&/g;
-	$msg =~ s/&frasl;/\//g;
 	$messages_from_user .= $msg . $delimiter;
 }
 write_file($output_file, $messages_from_user);
