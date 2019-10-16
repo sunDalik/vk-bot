@@ -32,6 +32,7 @@ def upload_photo(photo_path):
     else:
         return None
 
+joker_images = ["joker/" + img for img in os.listdir("joker")]
 
 def rndmsg_mode(msg_list, mentions):
     if not mentions:
@@ -47,7 +48,7 @@ def rndmsg_mode(msg_list, mentions):
                     e = event.object
                     attachments = list(filter(lambda a: a.get("type") =="photo", e.attachments))
                     if joker_re.search(e.text.lower()):
-                        memgen.make_meme([random.choice(msg_list)], [random.choice(msg_list)], "joker/" + random.choice(os.listdir("joker")))
+                        memgen.make_meme(random.choice(joker_images), "temp.png", msg_list)
                         photo = upload_photo("temp.png")
                         send_message(e.peer_id, attachment=photo)
                     elif (mentions_re.search(e.text.lower()) or (e.reply_message and e.reply_message.get("from_id") == -group_id)) and len(attachments) != 0:
