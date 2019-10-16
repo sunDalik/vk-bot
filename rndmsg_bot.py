@@ -3,16 +3,33 @@ from vk_api.bot_longpoll import VkBotLongPoll, VkBotEventType
 import random
 import re
 import sys
+import os
+import json
 from config import token, group_id
 import requests
-
+import img2msg 
 
 vk_session = vk_api.VkApi(token=token)
 vk = vk_session.get_api()
 
-def send_message(peer, msg, random):
-    if msg.strip() != "":
+
+def send_message(peer, msg="", random=random.randint(-2147483648, 2147483647), attachment=None):
+    if attachment is not None:
+        vk.messages.send(peer_id=peer, message=msg, random_id=random, attachment=attachment)
+    elif msg.strip() != "":
         vk.messages.send(peer_id=peer, message=msg, random_id=random)
+
+
+def upload_photo(photo_path):
+    img = {'photo': open(photo_path,"rb")}
+    upload_resp = json.loads(requests.post(vk.photos.getMessagesUploadServer()['upload_url'], files=img).text)
+    photo_id = upload_resp['photo']
+    if photo_id is not 'null':
+        photo_id = vk.photos.saveMessagesPhoto(photo=upload_resp['photo'], server=upload_resp['server'], hash=upload_resp['hash'])[0]['id']
+        attachment = str('photo-'+str(group_id)+'_'+str(photo_id))
+        return attachment
+    else:
+        return None
 
 
 def rndmsg_mode(msg_list, mentions):
@@ -28,24 +45,26 @@ def rndmsg_mode(msg_list, mentions):
                 if event.type == VkBotEventType.MESSAGE_NEW:
                     e = event.object
                     attachments = list(filter(lambda a: a.get("type") =="photo", e.attachments))
-                    if len(attachments) != 0:
+                    if joker_re.search(e.text.lower()):
+                        photo = upload_photo("joker/" + random.choice(os.listdir("joker")))
+                        send_message(e.peer_id, attachment=photo)
+                    elif (mentions_re.search(e.text.lower()) or (e.reply_message and e.reply_message.get("from_id") == -group_id)) and len(attachments) != 0:
                         img_resp = vk_session.http.get(attachments[0].get("photo").get("sizes")[-1].get("url"), allow_redirects=True)
                         open('temp', 'wb').write(img_resp.content)
-                    if joker_re.search(e.text.lower()):
-                        print("joker")
-                    elif (mentions_re.search(e.text.lower()) or (e.reply_message and e.reply_message.get("from_id") == -group_id)) and len(attachments) != 0:
-                        print("photo + text")
+                        print("tensorflow activated")
+                        send_message(e.peer_id, img2msg.get_msg(msg_list, "temp"))
+                        print("tensorflow deactivated")
                     elif mentions_re.search(e.text.lower()) or (e.reply_message and e.reply_message.get("from_id") == -group_id):
                         try:
-                            send_message(e.peer_id, random.choice(msg_list), random.randint(-2147483648, 2147483647))
+                            send_message(e.peer_id, random.choice(msg_list))
                         except Exception as e:
                             print(e)
                     elif len(attachments) != 0 and random.randint(1,4) == 1:
-                        # attachment[0]
-                        print("b")
+                        img_resp = vk_session.http.get(attachments[0].get("photo").get("sizes")[-1].get("url"), allow_redirects=True)
+                        open('temp', 'wb').write(img_resp.content)
                     elif random.randint(1, 100) == 1:
                         try:
-                            send_message(e.peer_id, random.choice(msg_list), random.randint(-2147483648, 2147483647))
+                            send_message(e.peer_id, random.choice(msg_list))
                         except Exception as e:
                             print(e)
         except requests.exceptions.ReadTimeout as timeout:
