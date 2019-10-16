@@ -71,7 +71,7 @@ def rndmsg_mode(msg_list, mentions):
                         send_message(e.peer_id, img2msg.get_msg(msg_list, "temp"))
                     
                     # has a chance to reply to any message
-                    elif random.randint(1, 100) == 1:
+                    elif random.randint(1, 50) == 1:
                         send_message(e.peer_id, random.choice(msg_list))
         except requests.exceptions.ReadTimeout as timeout:
             continue
