@@ -3,6 +3,7 @@ config.py
 *.html
 *.txt
 *.config
+!example*
 joker/
 test.pl
 temp*

@@ -32,12 +32,12 @@ def upload_photo(photo_path):
     else:
         return None
 
-joker_images = ["joker/" + img for img in os.listdir("joker")]
 
 def rndmsg_mode(msg_list, mentions):
     if not mentions:
         mentions = ['rndmsg']
     joker = ['джокер', 'joker', 'джокера', 'джокеру', 'джокером', 'джокере']
+    joker_images = ["joker/" + img for img in os.listdir("joker")]
     mentions_re = re.compile(r"\b(" + "|".join(mentions) + r")\b")
     joker_re = re.compile(r"\b(" + "|".join(joker) + r")\b")
     while True:
@@ -47,46 +47,36 @@ def rndmsg_mode(msg_list, mentions):
                 if event.type == VkBotEventType.MESSAGE_NEW:
                     e = event.object
                     attachments = list(filter(lambda a: a.get("type") =="photo", e.attachments))
+                    
                     # on joker command send joker meme
                     if joker_re.search(e.text.lower()):
                         memgen.make_meme(random.choice(joker_images), "temp.jpg", msg_list)
                         photo = upload_photo("temp.jpg")
-                        try:
-                            send_message(e.peer_id, attachment=photo)
-                        except Exception as e:
-                            print(e)
+                        send_message(e.peer_id, attachment=photo)
+                    
                     # on mention + photo reply to photo
                     elif (mentions_re.search(e.text.lower()) or (e.reply_message and e.reply_message.get("from_id") == -group_id)) and len(attachments) != 0:
                         img_resp = vk_session.http.get(attachments[0].get("photo").get("sizes")[-1].get("url"), allow_redirects=True)
                         open('temp', 'wb').write(img_resp.content)
-                        try:
-                            send_message(e.peer_id, img2msg.get_msg(msg_list, "temp"))
-                        except Exception as e:
-                            print(e)
+                        send_message(e.peer_id, img2msg.get_msg(msg_list, "temp"))
+                    
                     # on mention or reply send random message
                     elif mentions_re.search(e.text.lower()) or (e.reply_message and e.reply_message.get("from_id") == -group_id):
-                        try:
-                            send_message(e.peer_id, random.choice(msg_list))
-                        except Exception as e:
-                            print(e)
+                        send_message(e.peer_id, random.choice(msg_list))
+                    
                     # on photo with no mentions has a chance to reply to it
                     elif len(attachments) != 0 and random.randint(1,10) == 1:
                         img_resp = vk_session.http.get(attachments[0].get("photo").get("sizes")[-1].get("url"), allow_redirects=True)
                         open('temp', 'wb').write(img_resp.content)
-                        try:
-                            send_message(e.peer_id, img2msg.get_msg(msg_list, "temp"))
-                        except Exception as e:
-                            print(e)
+                        send_message(e.peer_id, img2msg.get_msg(msg_list, "temp"))
+                    
                     # has a chance to reply to any message
                     elif random.randint(1, 100) == 1:
-                        try:
-                            send_message(e.peer_id, random.choice(msg_list))
-                        except Exception as e:
-                            print(e)
+                        send_message(e.peer_id, random.choice(msg_list))
         except requests.exceptions.ReadTimeout as timeout:
             continue
-
-
+        except Exception as e:
+            print(e)
 
 
 def main():
@@ -101,49 +91,16 @@ def main():
                 delimiter = line
             else:
                 mentions.append(line)
+        f = open(msgs_file, "r")
+        msgs = f.read()
+        msg_list = msgs.split(delimiter)
+        f.close()
+        print("You are all set! Bot is working...")
+        rndmsg_mode(msg_list, mentions)
     else:
-        print("Choose how would you like to set up a bot:")
-        print("1. From stdin:")
-        print("2. From file: ")
-        option = input()
-        if option == "1":
-            print("Enter file with messages:")
-            msgs_file = input()
-            print("Enter messages delimiter:")
-            delimiter = input()
-            print("Enter mentions(words that will trigger the bot). Stop input with Ctrl-D")
-            mentions = []
-            while True:
-                try:
-                    mentions.append(input())
-                except EOFError:
-                    break
-
-        elif option == "2":
-            print("Enter config file:")
-            print("(First line - filename; second line - delimiter; then mentions, each on a new line)")
-            configfile = input()
-            cf = open(configfile, "r")
-            mentions = []
-            for i, line in enumerate(cf):
-                line = line.rstrip("\n")
-                if i == 0:
-                    msgs_file = line
-                elif i  == 1:
-                    delimiter = line
-                else:
-                    mentions.append(line)
-        
-        else:
-            print("Unknown option")
-            exit(1)
-
-    f = open(msgs_file, "r")
-    msgs = f.read()
-    msg_list = msgs.split(delimiter)
-    f.close()
-    print("You are all set! Bot is working...")
-    rndmsg_mode(msg_list, mentions)
+        print("Specify config file as a first argument!")
+        print("(First line - filename; second line - delimiter; then mentions, each on a new line)")
+        exit(1) 
 
 
 main()

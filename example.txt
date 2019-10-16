@@ -1,0 +1,1 @@
+Hello human!<delimiter>You wanna talk with me?<delimiter>I'm bored<delimiter>Are you afraid of me?<delimiter>
