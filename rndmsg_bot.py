@@ -38,8 +38,10 @@ def rndmsg_mode(msg_list, mentions):
         mentions = ['rndmsg']
     joker = ['джокер', 'joker', 'джокера', 'джокеру', 'джокером', 'джокере']
     joker_images = ["joker/" + img for img in os.listdir("joker")]
-    mentions_re = re.compile(r"\b(" + "|".join(mentions) + r")\b")
-    joker_re = re.compile(r"\b(" + "|".join(joker) + r")\b")
+    mentions_re = re.compile(r"\b(?:" + "|".join(mentions) + r")\b")
+    endings_re = re.compile(r"(?:ах|а|е|о|иях|ия|ие|й|ь|ы|ии|и|ях|я)$")
+    opinions_re = re.compile(r"\b(?:" + "|".join(mentions) + r") (?:что думаешь о|как тебе|твое мнение о) (.+?)\b")
+    joker_re = re.compile(r"\b(?:" + "|".join(joker) + r")\b")
     while True:
         longpoll = VkBotLongPoll(vk_session, group_id)
         try:
@@ -47,9 +49,17 @@ def rndmsg_mode(msg_list, mentions):
                 if event.type == VkBotEventType.MESSAGE_NEW:
                     e = event.object
                     attachments = list(filter(lambda a: a.get("type") =="photo", e.attachments))
-                    
+                   
+                    # if mention + what do you think of X then reply with random message about X
+                    if opinions_re.search(e.text.lower()):
+                        thing = opinions_re.search(e.text.lower()).group(1)
+                        thing = endings_re.sub("", thing)
+                        list_with_thing = list(m for m in msg_list if thing in m)
+                        message = random.choice(list_with_thing) if len(list_with_thing) != 0 else "Ничего не думаю"
+                        send_message(e.peer_id, message)
+
                     # on joker command send joker meme
-                    if joker_re.search(e.text.lower()):
+                    elif joker_re.search(e.text.lower()):
                         memgen.make_meme(random.choice(joker_images), "temp.jpg", msg_list)
                         photo = upload_photo("temp.jpg")
                         send_message(e.peer_id, attachment=photo)
