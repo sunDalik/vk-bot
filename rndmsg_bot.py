@@ -40,7 +40,7 @@ def rndmsg_mode(msg_list, mentions):
     joker_images = ["joker/" + img for img in os.listdir("joker")]
     mentions_re = re.compile(r"\b(?:" + "|".join(mentions) + r")\b")
     endings_re = re.compile(r"(?:ах|а|е|о|иях|ия|ие|й|ь|ы|ии|и|ях|я)$")
-    opinions_re = re.compile(r"\b(?:" + "|".join(mentions) + r") (?:что думаешь о|как тебе|твое мнение о) (.+?)\b")
+    opinions_re = re.compile(r"\b(?:" + "|".join(mentions) + r") (?:что думаешь о|как тебе|тво[её] мнение о) (.+?)\b")
     joker_re = re.compile(r"\b(?:" + "|".join(joker) + r")\b")
     while True:
         longpoll = VkBotLongPoll(vk_session, group_id)
@@ -55,7 +55,7 @@ def rndmsg_mode(msg_list, mentions):
                         thing = opinions_re.search(e.text.lower()).group(1)
                         thing = endings_re.sub("", thing)
                         list_with_thing = list(m for m in msg_list if thing in m)
-                        message = random.choice(list_with_thing) if len(list_with_thing) != 0 else "Ничего не думаю"
+                        message = random.choice(list_with_thing) if len(list_with_thing) != 0 else "Не знаю"
                         send_message(e.peer_id, message)
 
                     # on joker command send joker meme
