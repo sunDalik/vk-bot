@@ -40,7 +40,7 @@ def rndmsg_mode(msg_list, mentions):
     joker_images = ["joker/" + img for img in os.listdir("joker")]
     mentions_re = re.compile(r"\b(?:" + "|".join(mentions) + r")\b")
     endings_re = re.compile(r"(?:ах|а|е|о|иях|ия|ие|й|ь|ы|ии|и|ях|я)$")
-    opinions_re = re.compile(r"\b(?:" + "|".join(mentions) + r") (?:что думаешь о|как тебе|тво[её] мнение о) (.+?)\b")
+    opinions_re = re.compile(r"\b(?:" + "|".join(mentions) + r") (?:что (?:ты )?думаешь о|как тебе|тво[её] мнение об?) (.+?)\b")
     joker_re = re.compile(r"\b(?:" + "|".join(joker) + r")\b")
     while True:
         longpoll = VkBotLongPoll(vk_session, group_id)
