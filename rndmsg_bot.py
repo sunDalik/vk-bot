@@ -22,7 +22,7 @@ model = markovify.Text.from_json(model_json)
 def send_message(peer, msg="", random=random.randint(-2147483648, 2147483647), attachment=None):
     if attachment is not None:
         vk.messages.send(peer_id=peer, message=msg, random_id=random, attachment=attachment)
-    elif msg.strip() != "":
+    elif msg is not None and msg.strip() != "":
         vk.messages.send(peer_id=peer, message=msg, random_id=random)
 
 
@@ -59,7 +59,7 @@ def rndmsg_mode(msg_list, mentions):
                     # generate messages with markov chain
                     if shitpost_re.search(e.text.lower()):
                         if shitpost_re.search(e.text.lower()).group(1) is not None:
-                            message = model.make_sentence_with_start(shitpost_re.search(e.text.lower()).group(1), strict=False)
+                            message = model.make_sentence_with_start(shitpost_re.search(e.text.lower()).group(1), strict=False, max_words=20)
                         else:
                             message = model.make_short_sentence(140)
                         send_message(e.peer_id, message)
