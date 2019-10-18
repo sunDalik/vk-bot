@@ -9,6 +9,7 @@ from config import token, group_id
 import requests
 import img2msg
 import memgen
+import traceback
 
 vk_session = vk_api.VkApi(token=token)
 vk = vk_session.get_api()
@@ -41,7 +42,7 @@ def rndmsg_mode(msg_list, mentions):
     mentions_re = re.compile(r"\b(?:" + "|".join(mentions) + r")\b")
     endings_re = re.compile(r"(?:ах|а|ев|ей|е|ов|о|иях|ия|ие|ий|й|ь|ы|ии|и|ях|я|у)$")
     opinions_re = re.compile(r"\b(?:" + "|".join(mentions) + r") (?:что (?:ты )?думаешь (?:об?|про)|как тебе|тво[её] мнение об?|ваше мнение об?|как (?:ты )?относишься к) (.+?)\b")
-    joker_re = re.compile(r"\b(?:" + "|".join(joker) + r")\b")
+    joker_re = re.compile(r"\b(?:" + "|".join(joker) + r") ?(\++|\b)")
     while True:
         longpoll = VkBotLongPoll(vk_session, group_id)
         try:
@@ -60,7 +61,8 @@ def rndmsg_mode(msg_list, mentions):
 
                     # on joker command send joker meme
                     elif joker_re.search(e.text.lower()):
-                        memgen.make_meme(random.choice(joker_images), "temp.jpg", msg_list)
+                        word_count = len(joker_re.search(e.text.lower()).group(1))
+                        memgen.make_meme(random.choice(joker_images), "temp.jpg", msg_list, word_count)
                         photo = upload_photo("temp.jpg")
                         send_message(e.peer_id, attachment=photo)
                     
@@ -86,7 +88,7 @@ def rndmsg_mode(msg_list, mentions):
         except requests.exceptions.ReadTimeout as timeout:
             continue
         except Exception as e:
-            print(e)
+            print(traceback.format_exc())
 
 
 def main():
