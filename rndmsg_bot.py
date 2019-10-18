@@ -10,9 +10,13 @@ import requests
 import img2msg
 import memgen
 import traceback
+import markovify
 
 vk_session = vk_api.VkApi(token=token)
 vk = vk_session.get_api()
+with open("mkmodel.json") as f:
+         model_json = f.read()
+model = markovify.Text.from_json(model_json)
 
 
 def send_message(peer, msg="", random=random.randint(-2147483648, 2147483647), attachment=None):
@@ -50,9 +54,12 @@ def rndmsg_mode(msg_list, mentions):
                 if event.type == VkBotEventType.MESSAGE_NEW:
                     e = event.object
                     attachments = list(filter(lambda a: a.get("type") =="photo", e.attachments))
-                   
+                 
+                    if "прикол" in e.text.lower():
+                        send_message(e.peer_id, model.make_short_sentence(140))
+
                     # if mention + what do you think of X then reply with random message about X
-                    if opinions_re.search(e.text.lower()):
+                    elif opinions_re.search(e.text.lower()):
                         thing = opinions_re.search(e.text.lower()).group(1)
                         thing = endings_re.sub("", thing)
                         list_with_thing = list(m for m in msg_list if thing in m)
@@ -92,7 +99,7 @@ def rndmsg_mode(msg_list, mentions):
 
 
 def main():
-    if len(sys.argv) == 2:
+    if len(sys.argv) >= 2:
         cf = open(sys.argv[1], "r")
         mentions = []
         for i, line in enumerate(cf):
