@@ -47,6 +47,7 @@ def rndmsg_mode(msg_list, mentions):
     endings_re = re.compile(r"(?:ах|а|ев|ей|е|ов|о|иях|ия|ие|ий|й|ь|ы|ии|и|ях|я|у)$")
     opinions_re = re.compile(r"\b(?:" + "|".join(mentions) + r") (?:что (?:ты )?думаешь (?:об?|про)|как тебе|тво[её] мнение об?|ваше мнение об?|как (?:ты )?относишься к) (.+?)\b")
     joker_re = re.compile(r"\b(?:" + "|".join(joker) + r") ?(\++|\b)")
+    shitpost_re = re.compile(r"\bприкол\w*(?: про (.+?))?\b")
     while True:
         longpoll = VkBotLongPoll(vk_session, group_id)
         try:
@@ -55,8 +56,13 @@ def rndmsg_mode(msg_list, mentions):
                     e = event.object
                     attachments = list(filter(lambda a: a.get("type") =="photo", e.attachments))
                  
-                    if "прикол" in e.text.lower():
-                        send_message(e.peer_id, model.make_short_sentence(140))
+                    # generate messages with markov chain
+                    if shitpost_re.search(e.text.lower()):
+                        print(shitpost_re.search(e.text.lower()).group(1))
+                        if shitpost_re.search(e.text.lower()).group(1) is not None:
+                            send_message(e.peer_id, model.make_sentence_with_start(shitpost_re.search(e.text.lower()).group(1), strict=False))
+                        else:
+                            send_message(e.peer_id, model.make_short_sentence(140))
 
                     # if mention + what do you think of X then reply with random message about X
                     elif opinions_re.search(e.text.lower()):

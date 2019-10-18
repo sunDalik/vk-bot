@@ -9,7 +9,7 @@ else:
     with open(sys.argv[1], "r") as f:
             text = f.read()
     print("Generating the model...")
-    text = re.sub("<delimiter>", ".", text)
+    text = re.sub("<delimiter>", "\n", text)
     text_model = markovify.Text(text)
     starting_words_count = len([key for key in text_model.chain.model.keys() if "___BEGIN__" in key])
     print(f"Model generated. # of starting words: {starting_words_count}")
