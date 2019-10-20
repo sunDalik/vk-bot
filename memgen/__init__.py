@@ -118,5 +118,5 @@ def get_text_position_top(image_size, line_num, text_size):
 def get_text_position_bottom(image_size, line_num, text_size):
         # find bottom centered position for bottom text
         textPositionX = (image_size[0]/2) - (text_size[0]/2)
-        textPositionY = image_size[1] - (text_size[1] + 2) * line_num
+        textPositionY = (image_size[1] - (text_size[1] + 2) * line_num) - 5     # tune this const
         return (textPositionX, textPositionY)
