@@ -90,7 +90,7 @@ def rndmsg_mode(msg_list, mentions):
                         send_message(e.peer_id, random.choice(msg_list))
                     
                     # on photo with no mentions has a chance to reply to it
-                    elif len(attachments) != 0 and random.randint(1,10) == 1:
+                    elif len(attachments) != 0 and random.randint(1,20) == 1:
                         img_resp = vk_session.http.get(attachments[0].get("photo").get("sizes")[-1].get("url"), allow_redirects=True)
                         open('temp', 'wb').write(img_resp.content)
                         send_message(e.peer_id, img2msg.get_msg(msg_list, "temp"))
