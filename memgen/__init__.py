@@ -22,11 +22,11 @@ def make_meme(in_file, out_file, msg_list, min_words):
 
     top_msg = random.choice(msg_list).replace('\n', ' ')
     while len(top_msg) > 25 + min_words * 6:
-        top_msg = random.choice(msg_list)
+        top_msg = random.choice(msg_list).replace('\n', ' ')
 
     bottom_msg = random.choice(msg_list).replace('\n', ' ')
     while len(bottom_msg) > 25 + min_words * 6:
-        bottom_msg = random.choice(msg_list)
+        bottom_msg = random.choice(msg_list).replace('\n', ' ')
 
     make_meme_with_top_bottom([top_msg], [bottom_msg], in_file, out_file)
 

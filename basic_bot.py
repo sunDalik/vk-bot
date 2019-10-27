@@ -2,6 +2,7 @@ import vk_api
 from vk_api.bot_longpoll import VkBotLongPoll, VkBotEventType
 import random
 from config import token, group_id
+import requests
 
 vk_session = vk_api.VkApi(token=token)
 vk = vk_session.get_api()
