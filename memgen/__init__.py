@@ -14,15 +14,14 @@ import sys
 font_file = 'memgen/font.ttf'
 
 def make_meme(in_file, out_file, msg_list):
-    top_msg = random.choice(msg_list)
+    top_msg = random.choice(msg_list).replace('\n', ' ')
     while len(top_msg) > 25:
         top_msg = random.choice(msg_list)
 
-    bottom_msg = random.choice(msg_list)
+    bottom_msg = random.choice(msg_list).replace('\n', ' ')
     while len(bottom_msg) > 25:
         bottom_msg = random.choice(msg_list)
 
-    # TODO: split long messages to lines
     make_meme_with_top_bottom([top_msg], [bottom_msg], in_file, out_file)
 
 def make_meme_with_top_bottom(top_lines, bottom_lines, filename, out_filename):
