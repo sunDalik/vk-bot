@@ -13,7 +13,7 @@ my $i = 0;
 while ($input_file =~ /<div id="msg\d+?" class="msg_item">.*?<div class="from"> <b>$username<\/b>.*?<div class="msg_body">(.*?)<\/div>/g){
 	# print progress
 	$i++;
-	if ($i % 100 == 0) {
+	if ($i % 1000 == 0) {
 		print "$i messages found\n";
 	}
 	
@@ -27,4 +27,5 @@ while ($input_file =~ /<div id="msg\d+?" class="msg_item">.*?<div class="from"> 
 	$msg =~ s/&amp;/&/g;
 	$messages_from_user .= $msg . $delimiter;
 }
+print "Total: $i messages found\n";
 write_file($output_file, $messages_from_user);

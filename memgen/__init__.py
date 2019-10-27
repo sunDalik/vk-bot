@@ -13,16 +13,23 @@ import sys
 
 font_file = 'memgen/font.ttf'
 
-def make_meme(in_file, out_file, msg_list):
+def make_meme(in_file, out_file, msg_list, min_words):
+    if min_words > 0:
+        msg_list_saved = msg_list
+        msg_list = [m for m in msg_list if len(m.split()) > min_words]
+        if len(msg_list) == 0:
+            msg_list = msg_list_saved
+
     top_msg = random.choice(msg_list).replace('\n', ' ')
-    while len(top_msg) > 25:
+    while len(top_msg) > 25 + min_words * 6:
         top_msg = random.choice(msg_list)
 
     bottom_msg = random.choice(msg_list).replace('\n', ' ')
-    while len(bottom_msg) > 25:
+    while len(bottom_msg) > 25 + min_words * 6:
         bottom_msg = random.choice(msg_list)
 
     make_meme_with_top_bottom([top_msg], [bottom_msg], in_file, out_file)
+
 
 def make_meme_with_top_bottom(top_lines, bottom_lines, filename, out_filename):
     img = Image.open(filename)
@@ -108,11 +115,13 @@ def get_fontsize(image_size, text):
                 text_size = font.getsize(text)
         return font_size
 
+
 def get_text_position_top(image_size, line_num, text_size):
         # find top centered position for top text
         textPositionX = (image_size[0]/2) - (text_size[0]/2)
         textPositionY = (text_size[1] + 2) * line_num
         return (textPositionX, textPositionY)
+
 
 def get_text_position_bottom(image_size, line_num, text_size):
         # find bottom centered position for bottom text

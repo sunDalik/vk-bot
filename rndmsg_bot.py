@@ -9,15 +9,20 @@ from config import token, group_id
 import requests
 import img2msg
 import memgen
+import traceback
+import markovify
 
 vk_session = vk_api.VkApi(token=token)
 vk = vk_session.get_api()
+with open("mkmodel.json") as f:
+         model_json = f.read()
+model = markovify.Text.from_json(model_json)
 
 
 def send_message(peer, msg="", random=random.randint(-2147483648, 2147483647), attachment=None):
     if attachment is not None:
         vk.messages.send(peer_id=peer, message=msg, random_id=random, attachment=attachment)
-    elif msg.strip() != "":
+    elif msg is not None and msg.strip() != "":
         vk.messages.send(peer_id=peer, message=msg, random_id=random)
 
 
@@ -32,14 +37,17 @@ def upload_photo(photo_path):
     else:
         return None
 
-joker_images = ["joker/" + img for img in os.listdir("joker")]
 
 def rndmsg_mode(msg_list, mentions):
     if not mentions:
         mentions = ['rndmsg']
     joker = ['джокер', 'joker', 'джокера', 'джокеру', 'джокером', 'джокере']
-    mentions_re = re.compile(r"\b(" + "|".join(mentions) + r")\b")
-    joker_re = re.compile(r"\b(" + "|".join(joker) + r")\b")
+    joker_images = ["joker/" + img for img in os.listdir("joker")]
+    mentions_re = re.compile(r"\b(?:" + "|".join(mentions) + r")\b")
+    endings_re = re.compile(r"(?:ах|а|ев|ей|е|ов|о|иях|ия|ие|ий|й|ь|ы|ии|и|ях|я|у)$")
+    opinions_re = re.compile(r"\b(?:" + "|".join(mentions) + r") (?:что (?:ты )?думаешь (?:об?|про)|как тебе|тво[её] мнение об?|ваше мнение об?|как (?:ты )?относишься к) (.+?)\b")
+    joker_re = re.compile(r"\b(?:" + "|".join(joker) + r") ?(\++|\b)")
+    shitpost_re = re.compile(r"\bприкол\w*(?: про (.+?))?\b")
     while True:
         longpoll = VkBotLongPoll(vk_session, group_id)
         try:
@@ -47,50 +55,57 @@ def rndmsg_mode(msg_list, mentions):
                 if event.type == VkBotEventType.MESSAGE_NEW:
                     e = event.object
                     attachments = list(filter(lambda a: a.get("type") =="photo", e.attachments))
+                 
+                    # generate messages with markov chain
+                    if shitpost_re.search(e.text.lower()):
+                        if shitpost_re.search(e.text.lower()).group(1) is not None:
+                            message = model.make_sentence_with_start(shitpost_re.search(e.text.lower()).group(1), strict=False, max_words=15)
+                        else:
+                            message = model.make_short_sentence(115)
+                        send_message(e.peer_id, message)
+
+                    # if mention + what do you think of X then reply with random message about X
+                    elif opinions_re.search(e.text.lower()):
+                        thing = opinions_re.search(e.text.lower()).group(1)
+                        thing = endings_re.sub("", thing)
+                        list_with_thing = list(m for m in msg_list if thing in m)
+                        message = random.choice(list_with_thing) if len(list_with_thing) != 0 else "Не знаю"
+                        send_message(e.peer_id, message)
+
                     # on joker command send joker meme
-                    if joker_re.search(e.text.lower()):
-                        memgen.make_meme(random.choice(joker_images), "temp.jpg", msg_list)
+                    elif joker_re.search(e.text.lower()):
+                        word_count = len(joker_re.search(e.text.lower()).group(1))
+                        memgen.make_meme(random.choice(joker_images), "temp.jpg", msg_list, word_count)
                         photo = upload_photo("temp.jpg")
-                        try:
-                            send_message(e.peer_id, attachment=photo)
-                        except Exception as e:
-                            print(e)
+                        send_message(e.peer_id, attachment=photo)
+                    
                     # on mention + photo reply to photo
                     elif (mentions_re.search(e.text.lower()) or (e.reply_message and e.reply_message.get("from_id") == -group_id)) and len(attachments) != 0:
                         img_resp = vk_session.http.get(attachments[0].get("photo").get("sizes")[-1].get("url"), allow_redirects=True)
                         open('temp', 'wb').write(img_resp.content)
-                        try:
-                            send_message(e.peer_id, img2msg.get_msg(msg_list, "temp"))
-                        except Exception as e:
-                            print(e)
+                        send_message(e.peer_id, img2msg.get_msg(msg_list, "temp"))
+                    
                     # on mention or reply send random message
                     elif mentions_re.search(e.text.lower()) or (e.reply_message and e.reply_message.get("from_id") == -group_id):
-                        try:
-                            send_message(e.peer_id, random.choice(msg_list))
-                        except Exception as e:
-                            print(e)
+                        send_message(e.peer_id, random.choice(msg_list))
+                    
                     # on photo with no mentions has a chance to reply to it
-                    elif len(attachments) != 0 and random.randint(1,10) == 1:
+                    elif len(attachments) != 0 and random.randint(1,20) == 1:
                         img_resp = vk_session.http.get(attachments[0].get("photo").get("sizes")[-1].get("url"), allow_redirects=True)
                         open('temp', 'wb').write(img_resp.content)
-                        try:
-                            send_message(e.peer_id, img2msg.get_msg(msg_list, "temp"))
-                        except Exception as e:
-                            print(e)
+                        send_message(e.peer_id, img2msg.get_msg(msg_list, "temp"))
+                    
                     # has a chance to reply to any message
-                    elif random.randint(1, 100) == 1:
-                        try:
-                            send_message(e.peer_id, random.choice(msg_list))
-                        except Exception as e:
-                            print(e)
+                    elif random.randint(1, 50) == 1:
+                        send_message(e.peer_id, random.choice(msg_list))
         except requests.exceptions.ReadTimeout as timeout:
             continue
-
-
+        except Exception as e:
+            print(traceback.format_exc())
 
 
 def main():
-    if len(sys.argv) == 2:
+    if len(sys.argv) >= 2:
         cf = open(sys.argv[1], "r")
         mentions = []
         for i, line in enumerate(cf):
@@ -101,49 +116,16 @@ def main():
                 delimiter = line
             else:
                 mentions.append(line)
+        f = open(msgs_file, "r")
+        msgs = f.read()
+        msg_list = msgs.split(delimiter)
+        f.close()
+        print("You are all set! Bot is working...")
+        rndmsg_mode(msg_list, mentions)
     else:
-        print("Choose how would you like to set up a bot:")
-        print("1. From stdin:")
-        print("2. From file: ")
-        option = input()
-        if option == "1":
-            print("Enter file with messages:")
-            msgs_file = input()
-            print("Enter messages delimiter:")
-            delimiter = input()
-            print("Enter mentions(words that will trigger the bot). Stop input with Ctrl-D")
-            mentions = []
-            while True:
-                try:
-                    mentions.append(input())
-                except EOFError:
-                    break
-
-        elif option == "2":
-            print("Enter config file:")
-            print("(First line - filename; second line - delimiter; then mentions, each on a new line)")
-            configfile = input()
-            cf = open(configfile, "r")
-            mentions = []
-            for i, line in enumerate(cf):
-                line = line.rstrip("\n")
-                if i == 0:
-                    msgs_file = line
-                elif i  == 1:
-                    delimiter = line
-                else:
-                    mentions.append(line)
-        
-        else:
-            print("Unknown option")
-            exit(1)
-
-    f = open(msgs_file, "r")
-    msgs = f.read()
-    msg_list = msgs.split(delimiter)
-    f.close()
-    print("You are all set! Bot is working...")
-    rndmsg_mode(msg_list, mentions)
+        print("Specify config file as a first argument!")
+        print("(First line - filename; second line - delimiter; then mentions, each on a new line)")
+        exit(1) 
 
 
 main()
