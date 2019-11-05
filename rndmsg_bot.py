@@ -28,7 +28,7 @@ def send_message(peer, msg="", random=random.randint(-2147483648, 2147483647), a
 
 def upload_photo(photo_path):
     img = {'photo': open(photo_path,"rb")}
-    upload_resp = json.loads(requests.post(vk.photos.getMessagesUploadServer()['upload_url'], files=img).text)
+    upload_resp = requests.post(vk.photos.getMessagesUploadServer()['upload_url'], files=img).json()
     photo_id = upload_resp['photo']
     if photo_id is not 'null':
         photo_id = vk.photos.saveMessagesPhoto(photo=upload_resp['photo'], server=upload_resp['server'], hash=upload_resp['hash'])[0]['id']
